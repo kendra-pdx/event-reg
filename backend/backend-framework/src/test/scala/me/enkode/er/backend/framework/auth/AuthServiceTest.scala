@@ -62,7 +62,11 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(validAuthInfo)
+      authInfo must contain value validAuthInfo
+    }
+
+    Scenario("validating a token with a malformed issuer should fail") {
+      pending
     }
 
     Scenario("validating a good token but an expired key should fail") {
@@ -79,7 +83,7 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(AuthService.KeyOutOfDate)
+      authInfo must contain value AuthService.KeyOutOfDate
     }
 
     Scenario("validating a good token but a key that should not be used yet") {
@@ -96,7 +100,7 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(AuthService.KeyOutOfDate)
+      authInfo must contain value AuthService.KeyOutOfDate
     }
 
     Scenario("validating a token that's missing fields should fail") {
@@ -116,13 +120,13 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(AuthService.MissingField("sub"))
-      authInfo must contain value(AuthService.MissingField("aud"))
-      authInfo must contain value(AuthService.MissingField("iss"))
-      authInfo must contain value(AuthService.MissingField("exp"))
-      authInfo must contain value(AuthService.MissingField("nbf"))
-      authInfo must contain value(AuthService.MissingField("iat"))
-      authInfo must contain value(AuthService.MissingField("scp"))
+      authInfo must contain value AuthService.MissingField("sub")
+      authInfo must contain value AuthService.MissingField("aud")
+      authInfo must contain value AuthService.MissingField("iss")
+      authInfo must contain value AuthService.MissingField("exp")
+      authInfo must contain value AuthService.MissingField("nbf")
+      authInfo must contain value AuthService.MissingField("iat")
+      authInfo must contain value AuthService.MissingField("scp")
     }
 
     Scenario("validating a token that has fields of the wrong type should fail") {
@@ -147,9 +151,9 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(AuthService.InvalidField("sub"))
-      authInfo must contain value(AuthService.InvalidField("exp"))
-      authInfo must contain value(AuthService.InvalidField("scp"))
+      authInfo must contain value AuthService.InvalidField("sub")
+      authInfo must contain value AuthService.InvalidField("exp")
+      authInfo must contain value AuthService.InvalidField("scp")
     }
 
     Scenario("validating a token that has a tampered body should fail") {
@@ -175,7 +179,7 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(AuthService.InvalidSignature)
+      authInfo must contain value AuthService.InvalidSignature
     }
 
     Scenario("validating a token that has a tampered signature should fail") {
@@ -196,7 +200,15 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
         result
       }).runA(initialState).valueOr(throw _)
 
-      authInfo must contain value(AuthService.InvalidSignature)
+      authInfo must contain value AuthService.InvalidSignature
+    }
+
+    Scenario("validating a token that is expired should fail") {
+      pending
+    }
+
+    Scenario("validatinga token that is early should fail") {
+      pending
     }
   }
 }

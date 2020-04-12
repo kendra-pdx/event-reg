@@ -25,7 +25,7 @@ object AuthService {
   case class InvalidField(name: String) extends ValidationError
   case object InvalidSignature extends ValidationError
 
-  case object AlwaysFail extends ValidationError
+  type ValidationResult[T] = ValidatedNel[ValidationError, T]
 
   def sign(header: String, body: String, key: Key): String = {
     val alg = "HmacSHA256"
@@ -46,10 +46,9 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](keyRepository: KeyRepositor
     }
   }
 
-  type ValidationResult[T] = ValidatedNel[ValidationError, T]
-
   private def validateAuthInfo(authInfo: AuthInfo): F[ValidationResult[AuthInfo]] = {
-
+    //todo: validate exp / nbf
+    //todo: validate aud
     authInfo.validNel[ValidationError].pure[F]
   }
 
@@ -128,6 +127,15 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](keyRepository: KeyRepositor
     })
   }
 
+  /**
+   * extracts the auth token, validating the information along the way
+   * - that it is well formed
+   * - that the key is usable and valid
+   * - that the contents are allowed
+   * - that the signature is valid
+   * @param authToken the source token
+   * @return validated authinfo
+   */
   def validateAuthToken(authToken: AuthToken): F[ValidationResult[AuthInfo]] = {
     def validAuthInfo: F[ValidationResult[AuthInfo]] = validateBase64Decode(authToken.body)
       .andThen(validateTokenBodyParse)
@@ -155,6 +163,11 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](keyRepository: KeyRepositor
     }
   }
 
+  /**
+   * generate an auth token from the desired auth info, using the key specified as part of the issuer
+   * @param authInfo the source information to tokenize
+   * @return the auth token
+   */
   def authInfoToToken(authInfo: AuthInfo): F[AuthToken] = {
     import ujson._
     def base64e(src: String): String = {
@@ -186,11 +199,22 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](keyRepository: KeyRepositor
     }
   }
 
+  /**
+   * render's an AuthToken to a JWT string
+   * @param authToken the components of the token
+   * @return the JWT string representation of the token
+   */
   def renderToken(authToken: AuthToken): String = {
     List(authToken.header, authToken.body, authToken.signature).mkString(".")
   }
 
+  /**
+   * parses a JWT representation of a token into a AuthToken
+   * @param jwt the JWT string
+   * @return the components of the token
+   */
   def parseJwt(jwt: String): AuthToken = {
+    //todo: make this more resilient
     val List(header, body, signature) = jwt.split('.').toList
     AuthToken(header, body, signature)
   }
