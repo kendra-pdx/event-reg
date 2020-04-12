@@ -66,7 +66,29 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
     }
 
     Scenario("validating a token with a malformed issuer should fail") {
-      pending
+      def tamper(token: AuthToken): AuthToken = {
+        val newBody = {
+          import ujson._
+          val json = read(Base64.getDecoder.decode(token.body)).obj
+          json.update("iss", Str("malformed"))
+          Base64.getEncoder.encodeToString(write(json).getBytes)
+        }
+        token.copy(body = newBody)
+      }
+
+      val initialState = InMemoryState(
+        keys = Map(keyIdA -> keyA)
+      )
+
+      val authInfo = (for {
+        authToken <- authService.authInfoToToken(validAuthInfo)
+        tamperedToken = tamper(authToken)
+        result <- authService.validateAuthToken(tamperedToken)
+      } yield {
+        result
+      }).runA(initialState).valueOr(throw _)
+
+      authInfo must contain value AuthService.NoKeyId
     }
 
     Scenario("validating a good token but an expired key should fail") {
@@ -207,7 +229,7 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
       pending
     }
 
-    Scenario("validatinga token that is early should fail") {
+    Scenario("validating a token that is early should fail") {
       pending
     }
   }
