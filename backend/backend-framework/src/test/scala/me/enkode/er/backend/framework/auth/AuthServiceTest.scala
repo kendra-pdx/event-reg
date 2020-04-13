@@ -232,5 +232,25 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
     Scenario("validating a token that is early should fail") {
       pending
     }
+
+    Scenario("validating a token for an invalid audience should fail") {
+      pending
+    }
+  }
+
+  Feature("creating new tokens") {
+    Scenario("should be able to create a new token") {
+      pending
+    }
+  }
+
+  Feature("finding granted scopes") {
+    Scenario("should return all scopes for a defined user") {
+      pending
+    }
+
+    Scenario("should return no scopes for an undefined user") {
+      pending
+    }
   }
 }

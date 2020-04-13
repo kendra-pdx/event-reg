@@ -8,7 +8,6 @@ import org.scalatest.matchers.must.Matchers
 
 class InMemoryKeyRepositoryTest extends AnyFunSuite with Matchers with Data {
   private val respository = new InMemoryKeyRepository[StateT[Either[Throwable, *], InMemoryState, *]]
-//  import Data._
 
   test("when queried with an id that exists, it should return the key") {
     val initialState = InMemoryState(
@@ -17,6 +16,15 @@ class InMemoryKeyRepositoryTest extends AnyFunSuite with Matchers with Data {
 
     val key = respository.getKey(keyIdA).runA(initialState).valueOr(throw _)
     key must be(keyA)
+  }
+
+  test("returns a key when queried for current") {
+    val initialState = InMemoryState(
+      keys = Map(keyIdA -> keyA, keyIdB -> keyB)
+    )
+
+    val key = respository.currentKey().runA(initialState).valueOr(throw _)
+    key must (be(keyA) or be(keyB))
   }
 
   test("when queried with an id that doesn't exist, it should yield an error") {

@@ -16,4 +16,13 @@ class InMemoryKeyRepository[F[_]: MonadError[*[_], Throwable]](
       k
     }
   }
+
+  override def currentKey(): F[Key] = {
+    for {
+      kid <- S.inspect(_.keys.keys.last)
+      key <- getKey(kid)
+    } yield {
+      key
+    }
+  }
 }

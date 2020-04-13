@@ -4,10 +4,14 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
+import cats.implicits._
+import me.enkode.er.backend.framework.auth.{AuthService, PgKeyRepository}
 import me.enkode.er.backend.framework.log._
-import me.enkode.er.backend.module.profile.ProfileEndpoint
+import me.enkode.er.backend.module.profile.{PgProfileRepository, ProfileEndpoint, ProfileService}
+import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent._
+import scala.concurrent.duration._
 
 object ServerMain extends App with CORSSupport {
   val logger = new ConsoleLogger(this.getClass.getSimpleName, ConsoleLogger.Level.Debug)
@@ -18,7 +22,35 @@ object ServerMain extends App with CORSSupport {
 
   val basePathMatcher = PathMatcher("events")
 
-  val route = List(ProfileEndpoint)
+//  val db = Database.forURL(
+//    "jdbc:postgresql://postgres:5432/postgres",
+//    "postgres",
+//    "event-reg",
+//    driver = "org.postgresql.Driver")
+  val db = Database.forConfig("db.pgsql")
+  val dbEc = ExecutionContext.fromExecutor(null)
+
+  val keyRepository = new PgKeyRepository(db)(dbEc)
+  val authService = new AuthService(keyRepository)
+
+  val profileRepository = new PgProfileRepository(db)(dbEc)
+  val profileService = new ProfileService(profileRepository, authService)
+
+  val profileEndpoint = new ProfileEndpoint(profileService)
+
+  val init = (for {
+    _ <- keyRepository.init()
+    _ <- profileRepository.init()
+  } yield {
+    logger.info("DB Init Successful")
+  }).recover({
+    case t: Throwable =>
+      logger.error(s"DB Init Failed: $t")
+  })
+
+  Await.result(init, 60.seconds)
+
+  val route = List(profileEndpoint)
     .tapEach(e => logger.info(s"registering endpoint: ${e.name}"))
     .map(_.createRoute(basePathMatcher))
     .reduce(_ ~ _)

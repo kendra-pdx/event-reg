@@ -1,6 +1,7 @@
 package me.enkode.er.backend.framework.auth
 
-import java.time.Instant
+import java.time.{Duration, Instant}
+import java.time.temporal.ChronoUnit
 import java.util.Base64
 
 import cats._
@@ -10,6 +11,7 @@ import cats.implicits._
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
+import scala.concurrent.duration._
 import scala.util.Try
 
 object AuthService {
@@ -36,7 +38,10 @@ object AuthService {
   }
 }
 
-class AuthService[F[_]: MonadError[*[_], Throwable]](keyRepository: KeyRepository[F]) {
+class AuthService[F[_]: MonadError[*[_], Throwable]](
+  keyRepository: KeyRepository[F],
+  audience: AuthInfo.Audience = AuthInfo.Audience("*")
+) {
   import AuthService._
 
   private def keyIdFor(authInfo: AuthInfo): F[KeyId] = {
@@ -217,5 +222,29 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](keyRepository: KeyRepositor
     //todo: make this more resilient
     val List(header, body, signature) = jwt.split('.').toList
     AuthToken(header, body, signature)
+  }
+
+  def createToken(
+    subject: AuthInfo.Subject,
+    duration: FiniteDuration = 1.hour,
+    audience: AuthInfo.Audience = AuthService.this.audience,
+    scopes: List[AuthInfo.Scope] = Nil,
+  ): F[AuthToken] = {
+    def issuerDomain = classOf[AuthService[F]].getName
+    for {
+      key <- keyRepository.currentKey()
+      authInfo = AuthInfo(
+        AuthInfo.IssuerEncoding(issuerDomain, key.keyId),
+        subject,
+        audience,
+        AuthInfo.Expires(Instant.now.plus(Duration.ofNanos(duration.toNanos))),
+        AuthInfo.NotBefore(Instant.now.minus(1, ChronoUnit.SECONDS)),
+        AuthInfo.IssuedAt(Instant.now),
+        scopes
+      )
+      token <- authInfoToToken(authInfo)
+    } yield {
+      token
+    }
   }
 }

@@ -19,6 +19,9 @@ lazy val `backend-framework` = project.in(file("backend/backend-framework"))
       Modules.catsCore,
       Modules.catsMtlCore,
       Modules.catsEffect,
+      Modules.slick,
+      Modules.slickHikariCp,
+      Modules.pgSqlJdbc,
     )
   ).dependsOn(`backend-test-utils` % Test)
 
@@ -28,6 +31,9 @@ lazy val `backend-module-profile` = project.in(file("backend/backend-module-prof
     libraryDependencies ++= Seq(
       Modules.akkaHttp,
       Modules.akkaHttpCore,
+      Modules.slick,
+      Modules.slickHikariCp,
+      Modules.pgSqlJdbc,
     )
   )
 

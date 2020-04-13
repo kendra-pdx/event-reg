@@ -29,6 +29,9 @@ object Boilerplate extends AutoPlugin {
       val catsEffect = "2.1.2"
 
       val scalaTest = "3.1.1"
+
+      val pgSqlJdbc = "42.2.12"
+      val slick = "3.3.2"
     }
 
     lazy val kindProjector = "org.typelevel" %% "kind-projector" % Versions.kindProjector cross CrossVersion.full
@@ -48,5 +51,9 @@ object Boilerplate extends AutoPlugin {
     lazy val catsEffect = "org.typelevel" %% "cats-effect" % Versions.catsEffect
 
     lazy val scalaTest = "org.scalatest" %% "scalatest" % Versions.scalaTest
+
+    lazy val pgSqlJdbc =  "org.postgresql" % "postgresql" % Versions.pgSqlJdbc
+    lazy val slick = "com.typesafe.slick" %% "slick" % Versions.slick
+    lazy val slickHikariCp = "com.typesafe.slick" %% "slick-hikaricp" % Versions.slick
   }
 }
