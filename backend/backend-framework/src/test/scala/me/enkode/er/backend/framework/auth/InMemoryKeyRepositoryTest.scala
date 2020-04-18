@@ -32,4 +32,11 @@ class InMemoryKeyRepositoryTest extends AnyFunSuite with Matchers with Data {
     val key = respository.getKey(keyIdA).runA(initialState)
     key must be(Left(KeyRepository.KeyNotFoundError(keyIdA)))
   }
+
+  test("adding a key adds it to the state") {
+    val initialState = InMemoryState()
+    val updated = respository.saveKey(keyA).runS(initialState).valueOr(throw _)
+    updated.keys.keys must be(Set(keyIdA))
+    updated.keys(keyIdA) must be(keyA)
+  }
 }

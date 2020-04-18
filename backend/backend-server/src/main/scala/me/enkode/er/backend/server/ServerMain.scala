@@ -22,11 +22,6 @@ object ServerMain extends App with CORSSupport {
 
   val basePathMatcher = PathMatcher("events")
 
-//  val db = Database.forURL(
-//    "jdbc:postgresql://postgres:5432/postgres",
-//    "postgres",
-//    "event-reg",
-//    driver = "org.postgresql.Driver")
   val db = Database.forConfig("db.pgsql")
   val dbEc = ExecutionContext.fromExecutor(null)
 
@@ -36,11 +31,12 @@ object ServerMain extends App with CORSSupport {
   val profileRepository = new PgProfileRepository(db)(dbEc)
   val profileService = new ProfileService(profileRepository, authService)
 
-  val profileEndpoint = new ProfileEndpoint(profileService)
+  val profileEndpoint = new ProfileEndpoint(profileService, authService)
 
   val init = (for {
     _ <- keyRepository.init()
     _ <- profileRepository.init()
+    _ <- authService.generateKey()
   } yield {
     logger.info("DB Init Successful")
   }).recover({

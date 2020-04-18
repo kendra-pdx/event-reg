@@ -40,6 +40,26 @@ class PgProfileRepository(db: Database)(implicit ec: ExecutionContext) extends P
     }
   }
 
+
+  /**
+   * creates a user if they don't already exist
+   * throws DuplicateUserError if the user exists
+   */
+  override def insert(user: User): Future[User] = {
+    val q = Tables.profiles += ((
+      UUID.fromString(user.profile.profileId.asString),
+      user.profile.email,
+      user.profile.fullName,
+      user.password.hash,
+      user.password.lastChanged
+    ))
+    for{
+      _ <- db.run(q)
+    } yield {
+      user
+    }
+  }
+
   def init(): Future[Unit] = {
     val op = DBIO.seq(
       Tables.profiles.schema.createIfNotExists

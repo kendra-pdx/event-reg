@@ -25,4 +25,13 @@ class InMemoryKeyRepository[F[_]: MonadError[*[_], Throwable]](
       key
     }
   }
+
+  /**
+   * save the specified kye
+   */
+  override def saveKey(key: Key): F[Key] = for {
+    _ <- S.modify(s => s.copy(keys = s.keys.updated(key.keyId, key)))
+  } yield {
+    key
+  }
 }

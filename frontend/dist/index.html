@@ -1,6 +1,33 @@
 <html>
   <body>
-  Hello, Kendra?
+
+  <div id="app">
+    <div v-if="loaded">
+      <span>{{ profile.fullName }}</span>
+    </div>
+    <div v-if="!loaded">
+      <span>please login</span>
+    </div>
+
+    <hr/>
+
+    <div>
+      <div>Name: <input type="text" v-model="create.name"/></div>
+      <div>Email: <input type="text" v-model="create.email"/></div>
+      <div>Password: <input type="password" v-model="create.password"/></div>
+      <button v-on:click="doCreateUser">create</button>
+    </div>
+
+    <hr/>
+
+    <div>
+      <div>Email: <input type="text" v-model="login.email"/></div>
+      <div>Password: <input type="password" v-model="login.password"/></div>
+      <button v-on:click="doLogin">login</button>
+    </div>
+
+  </div>
+
   <script src="main.js"></script>
   </body>
 </html>

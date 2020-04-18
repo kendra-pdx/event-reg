@@ -11,13 +11,18 @@ trait KeyRepository[F[_]] {
 
   /**
    * find a key by id.
-   * @throws KeyNotFoundError when the key isn't found
+   * throws KeyNotFoundError when the key isn't found
    */
   def getKey(keyId: KeyId): F[Key]
 
   /**
    * find the most recent, active, unexpired key
-   * @throws CurrentKeyNotFoundError when there's no current key. you should create a new one.
+   * throws CurrentKeyNotFoundError when there's no current key. you should create a new one.
    */
   def currentKey(): F[Key]
+
+  /**
+   * save the specified kye
+   */
+  def saveKey(key: Key): F[Key]
 }

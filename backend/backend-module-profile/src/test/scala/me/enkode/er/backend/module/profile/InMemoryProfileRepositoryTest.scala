@@ -20,8 +20,32 @@ class InMemoryProfileRepositoryTest extends AnyFunSuite with Matchers with Data 
 
   test("when a user exists, return it") {
     val user = repository.findUserByEmail(userA.profile.email)
-      .runA(InMemoryState(users = List(userA))).valueOr(throw _)
+      .runA(InMemoryState(users = Set(userA))).valueOr(throw _)
 
     user must be(Some(userA))
+  }
+
+  test("insert a new unique user") {
+    val (state, created) = repository.insert(userB)
+      .run(InMemoryState(users = Set(userA))).valueOr(throw _)
+
+    created must be(userB)
+    state.users.find(_ == userB) must be(Some(userB))
+  }
+
+  test("insert a new unique user with a duplicate id, fails") {
+    val invalidUser = userB.copy(profile = userB.profile.copy(profileId = userA.profile.profileId))(userB.password)
+    val result = repository.insert(invalidUser)
+      .run(InMemoryState(users = Set(userA)))
+
+    result must be(Left(ProfileRepository.DuplicateUserError(invalidUser)))
+  }
+
+  test("insert a new unique user with a duplicate email, fails") {
+    val invalidUser = userB.copy(profile = userB.profile.copy(email = userA.profile.email))(userB.password)
+    val result = repository.insert(invalidUser)
+      .run(InMemoryState(users = Set(userA)))
+
+    result must be(Left(ProfileRepository.DuplicateUserError(invalidUser)))
   }
 }

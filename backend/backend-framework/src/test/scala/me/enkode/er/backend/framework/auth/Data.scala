@@ -32,7 +32,9 @@ trait Data {
       Expires(now.plus(30, ChronoUnit.DAYS)),
       NotBefore(now.minus(30, ChronoUnit.DAYS)),
       IssuedAt(now),
+      JwtId(UUID.randomUUID().toString),
       List(Scope("read")),
     )
   }
+
 }

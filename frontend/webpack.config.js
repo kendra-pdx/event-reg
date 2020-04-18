@@ -7,11 +7,18 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
   },
   mode: "development",
-    node: {
-      console: true,
-      fs: 'empty',
-      net: 'empty',
-      tls: 'empty'
-    }
+
+  node: {
+    console: true,
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  },
+
+  resolve: {
+    alias: {
+      vue: 'vue/dist/vue.js'
+    },
+  }
 
 };

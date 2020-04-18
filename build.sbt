@@ -1,6 +1,12 @@
 import Boilerplate.Modules
 
+lazy val commonSettings = Seq(
+  logLevel in assembly := Level.Info
+
+)
+
 lazy val `backend-test-utils` = project.in(file("backend/backend-test-utils"))
+  .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
       Modules.catsCore,
@@ -9,6 +15,7 @@ lazy val `backend-test-utils` = project.in(file("backend/backend-test-utils"))
   )
 
 lazy val `backend-framework` = project.in(file("backend/backend-framework"))
+  .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
       Modules.akkaActors,
@@ -26,9 +33,11 @@ lazy val `backend-framework` = project.in(file("backend/backend-framework"))
   ).dependsOn(`backend-test-utils` % Test)
 
 lazy val `backend-module-profile` = project.in(file("backend/backend-module-profile"))
+  .settings(commonSettings)
   .dependsOn(`backend-framework`)
   .settings(
     libraryDependencies ++= Seq(
+      Modules.akkaStreams,
       Modules.akkaHttp,
       Modules.akkaHttpCore,
       Modules.slick,
@@ -42,6 +51,7 @@ lazy val `backend-server` = project.in(file("backend/backend-server"))
     `backend-framework`,
     `backend-module-profile`,
   )
+  .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
       Modules.akkaStreams,
@@ -53,6 +63,7 @@ lazy val `backend-server` = project.in(file("backend/backend-server"))
   )
 
 lazy val `event-reg` = project.in(file("."))
+  .settings(commonSettings)
   .aggregate(
     `backend-server`,
     `backend-framework`,

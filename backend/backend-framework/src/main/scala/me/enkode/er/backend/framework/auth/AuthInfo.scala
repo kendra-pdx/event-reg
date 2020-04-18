@@ -39,5 +39,6 @@ case class AuthInfo(
   expires: AuthInfo.Expires,
   notBefore: AuthInfo.NotBefore,
   issuedAt: AuthInfo.IssuedAt,
+  jwtId: AuthInfo.JwtId,
   scopes: List[AuthInfo.Scope],
 )

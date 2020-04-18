@@ -63,6 +63,18 @@ class PgKeyRepository(db: Database)(implicit ec: ExecutionContext) extends KeyRe
     }
   }
 
+  override def saveKey(key: Key): Future[Key] = {
+    val q = DBIO.seq(
+      Tables.keys += ((key.keyId.asString, key.keyType.asString, key.data, key.expires, key.notBefore))
+    )
+
+    for {
+      _ <- db.run(q)
+    } yield {
+      key
+    }
+  }
+
   def init(): Future[Unit] = {
     val op = DBIO.seq(
       Tables.keys.schema.createIfNotExists

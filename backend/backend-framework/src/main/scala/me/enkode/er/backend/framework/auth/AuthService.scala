@@ -2,7 +2,7 @@ package me.enkode.er.backend.framework.auth
 
 import java.time.{Duration, Instant}
 import java.time.temporal.ChronoUnit
-import java.util.Base64
+import java.util.{Base64, UUID}
 
 import cats._
 import cats.data.Validated._
@@ -12,7 +12,7 @@ import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 import scala.concurrent.duration._
-import scala.util.Try
+import scala.util.{Random, Try}
 
 object AuthService {
   private case object KeyExtractionException extends RuntimeException("token did not contain a key id")
@@ -97,6 +97,7 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
       field("exp", v => AuthInfo.Expires(Instant.ofEpochSecond(v.num.toLong)), InvalidField("exp")),
       field("nbf", v => AuthInfo.NotBefore(Instant.ofEpochSecond(v.num.toLong)), InvalidField("nbf")),
       field("iat", v => AuthInfo.IssuedAt(Instant.ofEpochSecond(v.num.toLong)), InvalidField("iat")),
+      field("jti", v => AuthInfo.JwtId(v.str), InvalidField("jti")),
       field("scp", v => v.arr.toList.map(_.str).map(AuthInfo.Scope), InvalidField("scp"))
     ).mapN(AuthInfo.apply)
   }
@@ -195,6 +196,7 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
         "exp" -> Num(authInfo.expires.asInstant.toEpochMilli / 1000),
         "nbf" -> Num(authInfo.notBefore.asInstant.toEpochMilli / 1000),
         "iat" -> Num(authInfo.issuedAt.asInstant.toEpochMilli / 1000),
+        "jti" -> Str(authInfo.jwtId.asString),
         "scp" -> authInfo.scopes.map(s => Str(s.asString))
       )))
 
@@ -240,11 +242,29 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
         AuthInfo.Expires(Instant.now.plus(Duration.ofNanos(duration.toNanos))),
         AuthInfo.NotBefore(Instant.now.minus(1, ChronoUnit.SECONDS)),
         AuthInfo.IssuedAt(Instant.now),
+        AuthInfo.JwtId(UUID.randomUUID().toString),
         scopes
       )
       token <- authInfoToToken(authInfo)
     } yield {
       token
+    }
+  }
+
+  def generateKey(duration: FiniteDuration = 365.days): F[Key] = {
+    val now = Instant.now()
+    val key = new Key {
+      override val keyId: KeyId = KeyId(UUID.randomUUID().toString)
+      override val keyType: KeyType = KeyType("shared")
+      override val data: Array[Byte] = Random.alphanumeric.take(64).mkString.getBytes
+      override val expires: Instant = now.plus(Duration.ofNanos(duration.toNanos))
+      override val notBefore: Instant = now.minus(Duration.ofMinutes(1))
+    }
+
+    for {
+      _ <- keyRepository.saveKey(key)
+    } yield {
+      key
     }
   }
 }

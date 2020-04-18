@@ -1,6 +1,8 @@
 package me.enkode.er.backend.module.profile
 
 import java.security.MessageDigest
+import java.time.Instant
+import java.util.UUID
 
 import cats._
 import cats.data.EitherT
@@ -12,6 +14,9 @@ import scala.concurrent.duration._
 object ProfileService {
   sealed trait LoginFailure
   case class InvalidLogin(email: String) extends LoginFailure
+
+  sealed trait CreateUserFailure
+  case class DuplicateUser(user: User) extends CreateUserFailure
 
   def hash(clear: String): Array[Byte] = {
     val salty = s"me.enkode.profile.pw:$clear"
@@ -54,4 +59,18 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
     }).value
   }
 
+  def createUser(email: String, fullName: String, clearPassword: String): F[Either[CreateUserFailure, User]] = {
+    //todo: validate inputs
+    val password = Password(hash(clearPassword), Instant.now)
+    val user = User(
+      Profile(ProfileId(UUID.randomUUID().toString), fullName, email)
+    )(password)
+    (for {
+      user <- profileRepository.insert(user)
+    } yield {
+      user.asRight[CreateUserFailure]
+    }).recover({
+      case ProfileRepository.DuplicateUserError(_) => DuplicateUser(user).asLeft[User]
+    })
+  }
 }
