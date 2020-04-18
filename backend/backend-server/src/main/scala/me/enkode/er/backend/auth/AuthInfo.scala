@@ -1,4 +1,4 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
 import java.time.Instant
 

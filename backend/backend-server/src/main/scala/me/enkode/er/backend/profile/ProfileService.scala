@@ -1,4 +1,4 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 import java.security.MessageDigest
 import java.time.Instant
@@ -7,7 +7,7 @@ import java.util.UUID
 import cats._
 import cats.data.EitherT
 import cats.implicits._
-import me.enkode.er.backend.framework.auth.{AuthInfo, AuthService}
+import me.enkode.er.backend.auth.{AuthInfo, AuthService}
 
 import scala.concurrent.duration._
 

@@ -1,5 +1,6 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
+import me.enkode.er.backend.InMemoryState
 import org.scalatest.featurespec.AnyFeatureSpec
 
 class ProfileServiceTest extends AnyFeatureSpec with Data {

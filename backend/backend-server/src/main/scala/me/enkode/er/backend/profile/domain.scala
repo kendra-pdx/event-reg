@@ -1,8 +1,8 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 import java.time.Instant
 
-import me.enkode.er.backend.framework.auth.AuthToken
+import me.enkode.er.backend.auth.AuthToken
 
 case class ProfileId(asString: String) extends AnyVal
 case class Password(hash: Array[Byte], lastChanged: Instant, schemeVersion: Int = 0)

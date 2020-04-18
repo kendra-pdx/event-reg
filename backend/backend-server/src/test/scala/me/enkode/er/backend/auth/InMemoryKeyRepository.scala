@@ -1,8 +1,9 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
 import cats._
 import cats.implicits._
 import cats.mtl.MonadState
+import me.enkode.er.backend.InMemoryState
 
 class InMemoryKeyRepository[F[_]: MonadError[*[_], Throwable]](
   implicit S: MonadState[F, InMemoryState])

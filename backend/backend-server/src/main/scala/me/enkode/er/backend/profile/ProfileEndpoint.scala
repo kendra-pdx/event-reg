@@ -1,10 +1,10 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{PathMatcher, Route}
-import cats.data.{EitherT, NonEmptyList}
+import cats.data.EitherT
 import cats.implicits._
-import me.enkode.er.backend.framework.auth.AuthService
+import me.enkode.er.backend.auth.AuthService
 import me.enkode.er.backend.framework.log._
 import me.enkode.er.backend.framework.{Endpoint, μPickleMarshallingSupport}
 

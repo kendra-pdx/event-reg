@@ -1,11 +1,12 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.profile
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-trait Data {
+import me.enkode.er.backend.auth.{Key, KeyId, KeyType}
 
+trait Data {
   def now(): Instant = Instant.ofEpochSecond(Instant.now.getEpochSecond)
 
   case class TestKey(
@@ -23,18 +24,8 @@ trait Data {
   val keyIdB: KeyId = KeyId("b")
   val keyB: TestKey = TestKey(keyIdB)
 
-  val validAuthInfo: AuthInfo = {
-    import AuthInfo._
-    AuthInfo(
-      IssuerEncoding("todo", keyIdA),
-      Subject("todo"),
-      Audience("todo"),
-      Expires(now.plus(30, ChronoUnit.DAYS)),
-      NotBefore(now.minus(30, ChronoUnit.DAYS)),
-      IssuedAt(now),
-      JwtId(UUID.randomUUID().toString),
-      List(Scope("read")),
-    )
-  }
-
+  val profileA = Profile(ProfileId(UUID.randomUUID().toString), "a", "profile@a.com")
+  val profileB = Profile(ProfileId(UUID.randomUUID().toString), "b", "profile@b.com")
+  val userA = User(profileA)(Password(Array.emptyByteArray, Instant.now))
+  val userB = User(profileB)(Password(Array.emptyByteArray, Instant.now))
 }

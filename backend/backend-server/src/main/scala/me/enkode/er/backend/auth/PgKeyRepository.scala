@@ -1,9 +1,10 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
 import java.time.Instant
 
-import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.PostgresProfile.api._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object PgKeyRepository {
   object Tables {
@@ -20,8 +21,8 @@ object PgKeyRepository {
   }
 }
 class PgKeyRepository(db: Database)(implicit ec: ExecutionContext) extends KeyRepository[Future] {
-  import PgKeyRepository._
   import KeyRepository._
+  import PgKeyRepository._
 
   override def getKey(keyId: KeyId): Future[Key] = {
     val q = Tables.keys.filter(_.id === keyId.asString)

@@ -1,20 +1,17 @@
-package me.enkode.er.backend.framework
+package me.enkode.er.backend.auth
 
-package auth {
+import java.time.Instant
 
-  import java.time.Instant
-
+  package object auth {
+}
   case class KeyId(asString: String) extends AnyVal
+
   case class KeyType(asString: String) extends AnyVal
 
-  trait Key {
+trait Key {
     val keyId: KeyId
     val keyType: KeyType
     val data: Array[Byte]
     val expires: Instant
     val notBefore: Instant
   }
-}
-
-package object auth {
-}

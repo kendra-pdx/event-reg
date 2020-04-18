@@ -1,10 +1,11 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 import java.time.Instant
 import java.util.UUID
 
-import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.PostgresProfile.api._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object PgProfileRepository {
   object Tables {

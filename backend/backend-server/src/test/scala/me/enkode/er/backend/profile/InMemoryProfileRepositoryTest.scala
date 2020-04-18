@@ -1,8 +1,9 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 import cats.data.StateT
 import cats.implicits._
 import cats.mtl.implicits._
+import me.enkode.er.backend.InMemoryState
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 

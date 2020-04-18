@@ -1,7 +1,7 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
-import java.time.{Duration, Instant}
 import java.time.temporal.ChronoUnit
+import java.time.{Duration, Instant}
 import java.util.{Base64, UUID}
 
 import cats._

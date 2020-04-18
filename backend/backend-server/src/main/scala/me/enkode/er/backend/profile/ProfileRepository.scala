@@ -1,4 +1,4 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 object ProfileRepository {
   case class DuplicateUserError(user: User) extends RuntimeException("duplicate user")

@@ -5,9 +5,9 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import cats.implicits._
-import me.enkode.er.backend.framework.auth.{AuthService, PgKeyRepository}
+import me.enkode.er.backend.auth.{AuthService, PgKeyRepository}
 import me.enkode.er.backend.framework.log._
-import me.enkode.er.backend.module.profile.{PgProfileRepository, ProfileEndpoint, ProfileService}
+import me.enkode.er.backend.profile.{PgProfileRepository, ProfileEndpoint, ProfileService}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent._

@@ -1,9 +1,11 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend.profile
 
 import cats._
 import cats.implicits._
 import cats.mtl.MonadState
-import me.enkode.er.backend.module.profile.ProfileRepository.DuplicateUserError
+import me.enkode.er.backend.InMemoryState
+import me.enkode.er.backend.profile.ProfileRepository.DuplicateUserError
+import me.enkode.er.backend.profile.ProfileRepository
 
 class InMemoryProfileRepository[F[_]: MonadError[*[_], Throwable]](
   implicit S: MonadState[F, InMemoryState]

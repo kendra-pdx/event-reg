@@ -1,4 +1,4 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
 import java.time.temporal.ChronoUnit
 import java.util.Base64
@@ -6,6 +6,7 @@ import java.util.Base64
 import cats.data._
 import cats.implicits._
 import cats.mtl.implicits._
+import me.enkode.er.backend.InMemoryState
 import me.enkode.test_utils.implicits._
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.must.Matchers

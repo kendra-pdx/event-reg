@@ -1,6 +1,7 @@
-package me.enkode.er.backend.module.profile
+package me.enkode.er.backend
 
-import me.enkode.er.backend.framework.auth._
+import me.enkode.er.backend.auth.{Key, KeyId}
+import me.enkode.er.backend.profile.User
 
 case class InMemoryState(
   keys: Map[KeyId, Key] = Map.empty,

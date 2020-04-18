@@ -1,4 +1,4 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
 object KeyRepository {
   sealed trait Error extends Throwable
@@ -7,7 +7,6 @@ object KeyRepository {
 }
 
 trait KeyRepository[F[_]] {
-  import KeyRepository._
 
   /**
    * find a key by id.

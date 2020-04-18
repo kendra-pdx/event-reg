@@ -1,8 +1,9 @@
-package me.enkode.er.backend.framework.auth
+package me.enkode.er.backend.auth
 
 import cats.data._
 import cats.implicits._
 import cats.mtl.implicits._
+import me.enkode.er.backend.InMemoryState
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 
