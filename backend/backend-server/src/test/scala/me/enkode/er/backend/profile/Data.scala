@@ -12,6 +12,6 @@ trait Data extends AuthData {
   val userAPassword = "userAPassword"
   val userBPassword = "userAPassword"
 
-  val userA = User(profileA)(Password(ProfileService.hash(userAPassword), Instant.now))
-  val userB = User(profileB)(Password(ProfileService.hash(userBPassword), Instant.now))
+  val userA = User(profileA)(Password(ProfileService.hash(userAPassword, profileA.email), Instant.now))
+  val userB = User(profileB)(Password(ProfileService.hash(userBPassword, profileB.email), Instant.now))
 }

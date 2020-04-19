@@ -22,8 +22,8 @@ object ProfileService {
   case class ProfileNotFound(profileId: ProfileId) extends FindProfileFailure
   case class FindProfileRepFailure(t: Throwable) extends FindProfileFailure
 
-  def hash(clear: String): Array[Byte] = {
-    val salty = s"me.enkode.profile.pw:$clear"
+  def hash(clear: String, unique: String): Array[Byte] = {
+    val salty = s"me.enkode.profile.pw:$unique:$clear"
     val digest = MessageDigest.getInstance("SHA-256")
     digest.digest(salty.getBytes)
   }
@@ -40,7 +40,7 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
       user <- profileRepository.findUserByEmail(email)
     } yield {
       user.fold(InvalidLogin(email).asLeft[User]) { user =>
-        if (user.password.hash sameElements hash(password)) {
+        if (user.password.hash sameElements hash(password, email)) {
           user.asRight[InvalidLogin]
         } else {
           InvalidLogin(email).asLeft[User]
@@ -65,7 +65,7 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
 
   def createUser(email: String, fullName: String, clearPassword: String): F[Either[CreateUserFailure, User]] = {
     //todo: validate inputs
-    val password = Password(hash(clearPassword), Instant.now)
+    val password = Password(hash(clearPassword, email), Instant.now)
     val user = User(
       Profile(ProfileId(UUID.randomUUID().toString), fullName, email)
     )(password)

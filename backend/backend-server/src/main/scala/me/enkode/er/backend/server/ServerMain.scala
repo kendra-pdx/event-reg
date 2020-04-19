@@ -14,6 +14,8 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 object ServerMain extends App with CORSSupport {
+  import me.enkode.er.backend.framework.ErrorResponse.akkaErrorHandler
+
   val logger = new ConsoleLogger(this.getClass.getSimpleName, ConsoleLogger.Level.Debug)
   implicit val traceSpan = TraceSpan("serverMain")
 

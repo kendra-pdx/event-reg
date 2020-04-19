@@ -2,11 +2,11 @@ package me.enkode.er.backend.profile
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{PathMatcher, Route}
-import cats.data.{EitherT, OptionT}
+import cats.data.EitherT
 import cats.implicits._
 import me.enkode.er.backend.auth.AuthService
 import me.enkode.er.backend.framework.log._
-import me.enkode.er.backend.framework.{Endpoint, μPickleMarshallingSupport}
+import me.enkode.er.backend.framework.{Endpoint, ErrorResponse, μPickleMarshallingSupport}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -61,7 +61,7 @@ class ProfileEndpoint(
       requestTrace("createProfile") { implicit traceSpan: TraceSpan =>
         (post & entity(as[CreateUserRequest])) { createUser =>
           complete {
-            logger.info(s"creating profile: email=${createUser.email}")
+            logger.info(s"creating profile: email=${createUser}")
             (for {
               created <- EitherT(profileService.createUser(createUser.email, createUser.fullName, createUser.password))
             } yield {
@@ -81,7 +81,10 @@ class ProfileEndpoint(
               profile <- EitherT(profileService.findProfileById(profileId))
             } yield {
               ProfileResponse(profile)
-            }).valueOr(err => throw new RuntimeException(err.toString))
+            }).valueOr({
+              case ProfileService.ProfileNotFound(id) => throw ErrorResponse.ClientError(s"$id not found")
+              case ProfileService.FindProfileRepFailure(t) => throw ErrorResponse.ClientError(t.getMessage)
+            })
           }
         }
       }
@@ -91,6 +94,7 @@ class ProfileEndpoint(
       (post & entity(as[LoginRequest])) { loginRequest =>
         requestTrace("login") { implicit traceSpan =>
           complete {
+            logger.debug(s"login: email=${loginRequest.email}")
             (for {
               login <- EitherT(profileService.login(loginRequest.email, loginRequest.password))
               profileId = login.user.profile.profileId
@@ -98,7 +102,10 @@ class ProfileEndpoint(
               refreshToken = authService.renderToken(login.refreshToken)
             } yield {
               LoginResponse(profileId.asString, authToken, refreshToken)
-            }).valueOr(err => throw new RuntimeException(err.toString))
+            }).valueOr({
+              case ProfileService.InvalidLogin(invalidEmail) =>
+                throw ErrorResponse.ClientError(s"invalid login: $invalidEmail")
+            })
           }
         }
       }

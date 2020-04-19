@@ -24,6 +24,15 @@ class ProfileServiceTest extends AnyFeatureSpec with Matchers with EitherValues 
     users = Set.empty
   )
 
+  Feature("hashing a password") {
+    Scenario("hashing two different passwords gives to different hashes") {
+      val hash1 = ProfileService.hash("foo", "a")
+      val hash2 = ProfileService.hash("bar", "b")
+
+      hash1 must not contain theSameElementsAs (hash2)
+    }
+  }
+
   Feature("logging in") {
     Scenario("a valid login") {
       val state = initialState.copy(users = Set(userA))
