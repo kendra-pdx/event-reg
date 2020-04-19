@@ -26,6 +26,8 @@ lazy val `backend-server` = project.in(file("backend/backend-server"))
       Modules.catsEffect,
       Modules.catsMtlCore,
       Modules.enumeratum,
+      Modules.monocleCore,
+      Modules.monocleMacro,
       Modules.pgSqlJdbc,
       Modules.slick,
       Modules.slickHikariCp,

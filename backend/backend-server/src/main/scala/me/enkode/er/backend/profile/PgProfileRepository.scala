@@ -26,7 +26,7 @@ class PgProfileRepository(db: Database)(implicit ec: ExecutionContext) extends P
   import PgProfileRepository._
 
   override def findUserByEmail(email: String): Future[Option[User]] = {
-    val q = Tables.profiles.filter(_.email === email)
+    val q = Tables.profiles.filter(_.email === email).distinct
     for {
       result <- db.run(q.result)
     } yield {
@@ -41,6 +41,21 @@ class PgProfileRepository(db: Database)(implicit ec: ExecutionContext) extends P
     }
   }
 
+
+  /**
+   * find a profile by id
+   */
+  override def findProfileById(profileId: UUID): Future[Option[Profile]] = {
+    val q = Tables.profiles.filter(_.id === profileId)
+      .map(u => (u.id, u.email, u.fullName))
+    for {
+      result <- db.run(q.result)
+    } yield {
+      result.headOption.map { case (id, email, fullName) =>
+        Profile(ProfileId(id.toString), fullName, email)
+      }
+    }
+  }
 
   /**
    * creates a user if they don't already exist

@@ -9,6 +9,7 @@ object Boilerplate extends AutoPlugin {
     scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlint"),
 //    scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlint", "-Xfatal-warnings"),
     addCompilerPlugin(Modules.kindProjector),
+//    addCompilerPlugin(Modules.paradiseMacros),
     libraryDependencies += Modules.scalaTest % Test
   )
 
@@ -32,9 +33,12 @@ object Boilerplate extends AutoPlugin {
 
       val pgSqlJdbc = "42.2.12"
       val slick = "3.3.2"
+
+      val monocle = "2.0.3"
     }
 
     lazy val kindProjector = "org.typelevel" %% "kind-projector" % Versions.kindProjector cross CrossVersion.full
+    lazy val paradiseMacros = "org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full
 
     lazy val akkaHttpCore = "com.typesafe.akka" %% "akka-http-core" % Versions.akkaHttp
     lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Versions.akkaHttp
@@ -55,5 +59,8 @@ object Boilerplate extends AutoPlugin {
     lazy val pgSqlJdbc =  "org.postgresql" % "postgresql" % Versions.pgSqlJdbc
     lazy val slick = "com.typesafe.slick" %% "slick" % Versions.slick
     lazy val slickHikariCp = "com.typesafe.slick" %% "slick-hikaricp" % Versions.slick
+
+    lazy val monocleCore = "com.github.julien-truffaut" %%  "monocle-core" % Versions.monocle
+    lazy val monocleMacro = "com.github.julien-truffaut" %%  "monocle-macro" % Versions.monocle
   }
 }

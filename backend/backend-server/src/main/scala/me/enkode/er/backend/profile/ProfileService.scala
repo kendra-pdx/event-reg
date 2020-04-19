@@ -18,6 +18,10 @@ object ProfileService {
   sealed trait CreateUserFailure
   case class DuplicateUser(user: User) extends CreateUserFailure
 
+  sealed trait FindProfileFailure
+  case class ProfileNotFound(profileId: ProfileId) extends FindProfileFailure
+  case class FindProfileRepFailure(t: Throwable) extends FindProfileFailure
+
   def hash(clear: String): Array[Byte] = {
     val salty = s"me.enkode.profile.pw:$clear"
     val digest = MessageDigest.getInstance("SHA-256")
@@ -71,6 +75,18 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
       user.asRight[CreateUserFailure]
     }).recover({
       case ProfileRepository.DuplicateUserError(_) => DuplicateUser(user).asLeft[User]
+      case _: Throwable => ???
+    })
+  }
+
+  def findProfileById(id: ProfileId): F[Either[FindProfileFailure, Profile]] = {
+    (for {
+      profile <- profileRepository.findProfileById(UUID.fromString(id.asString))
+    } yield {
+      lazy val notFound: FindProfileFailure = ProfileNotFound(id)
+      profile.fold(notFound.asLeft[Profile])(_.asRight[FindProfileFailure])
+    }).recover({
+      case t: Throwable => FindProfileRepFailure(t).asLeft[Profile]
     })
   }
 }

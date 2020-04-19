@@ -1,5 +1,7 @@
 package me.enkode.er.backend.profile
 
+import java.util.UUID
+
 import cats.data.StateT
 import cats.implicits._
 import cats.mtl.implicits._
@@ -12,18 +14,32 @@ class InMemoryProfileRepositoryTest extends AnyFunSuite with Matchers with Data 
 
   val repository = new InMemoryProfileRepository[TestState[*]]()
 
-  test("when a user doesn't exist, return none") {
+  test("when searching for a user doesn't exist by email, return none") {
     val user = repository.findUserByEmail("none@enkode.me")
       .runA(InMemoryState()).valueOr(throw _)
 
     user must be(None)
   }
 
-  test("when a user exists, return it") {
+  test("when a user by email exists, return it") {
     val user = repository.findUserByEmail(userA.profile.email)
       .runA(InMemoryState(users = Set(userA))).valueOr(throw _)
 
     user must be(Some(userA))
+  }
+
+  test("searching for a profile by id that exists should return it") {
+    val user = repository.findProfileById(UUID.fromString(userA.profile.profileId.asString))
+      .runA(InMemoryState(users = Set(userA))).valueOr(throw _)
+
+    user must be (Some(userA.profile))
+  }
+
+  test("searching for a profile by id that doesn't exist, return none") {
+    val user = repository.findProfileById(UUID.fromString(userA.profile.profileId.asString))
+      .runA(InMemoryState()).valueOr(throw _)
+
+    user must be (None)
   }
 
   test("insert a new unique user") {

@@ -2,7 +2,7 @@ package me.enkode.er.backend.profile
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{PathMatcher, Route}
-import cats.data.EitherT
+import cats.data.{EitherT, OptionT}
 import cats.implicits._
 import me.enkode.er.backend.auth.AuthService
 import me.enkode.er.backend.framework.log._
@@ -76,8 +76,13 @@ class ProfileEndpoint(
       requestTrace("getProfile") { implicit traceSpan: TraceSpan =>
         get {
           logger.debug(Map("profileId" -> profileId.asString))
-          val profile = Profile(profileId, "Kendra Elford", "kendra@enkode.me")
-          complete(ProfileResponse(profile))
+          complete {
+            (for {
+              profile <- EitherT(profileService.findProfileById(profileId))
+            } yield {
+              ProfileResponse(profile)
+            }).valueOr(err => throw new RuntimeException(err.toString))
+          }
         }
       }
     }

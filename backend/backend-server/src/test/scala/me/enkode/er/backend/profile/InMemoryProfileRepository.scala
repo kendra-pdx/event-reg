@@ -1,11 +1,12 @@
 package me.enkode.er.backend.profile
 
+import java.util.UUID
+
 import cats._
 import cats.implicits._
 import cats.mtl.MonadState
 import me.enkode.er.backend.InMemoryState
 import me.enkode.er.backend.profile.ProfileRepository.DuplicateUserError
-import me.enkode.er.backend.profile.ProfileRepository
 
 class InMemoryProfileRepository[F[_]: MonadError[*[_], Throwable]](
   implicit S: MonadState[F, InMemoryState]
@@ -35,5 +36,14 @@ class InMemoryProfileRepository[F[_]: MonadError[*[_], Throwable]](
     } yield {
       user
     }
+  }
+
+  /**
+   * find a profile by id
+   */
+  override def findProfileById(profileId: UUID): F[Option[Profile]] = for {
+    profile <- S.inspect(_.profilesById.get(ProfileId(profileId.toString)))
+  } yield {
+    profile
   }
 }
