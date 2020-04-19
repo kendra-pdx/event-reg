@@ -2,7 +2,6 @@ package me.enkode.er.backend.framework
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server._
-import me.enkode.er.backend.server.CORSSupport
 import ujson._
 
 import scala.util.control.NonFatal

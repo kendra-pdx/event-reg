@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import cats.implicits._
 import me.enkode.er.backend.auth.{AuthService, PgKeyRepository}
+import me.enkode.er.backend.framework.CORSSupport
 import me.enkode.er.backend.framework.log._
 import me.enkode.er.backend.profile.{PgProfileRepository, ProfileEndpoint, ProfileService}
 import slick.jdbc.PostgresProfile.api._
@@ -15,6 +16,7 @@ import scala.concurrent.duration._
 
 object ServerMain extends App with CORSSupport {
   import me.enkode.er.backend.framework.ErrorResponse.akkaErrorHandler
+  import ServerRejectionHandler._
 
   val logger = new ConsoleLogger(this.getClass.getSimpleName, ConsoleLogger.Level.Debug)
   implicit val traceSpan = TraceSpan("serverMain")

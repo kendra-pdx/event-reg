@@ -5,11 +5,9 @@ import * as services from "./services.js"
 var app = new Vue({
   el: "#app",
   data: {
-    profile: {
-
-    },
-    message: "Hello Kendra!",
     loaded: false,
+
+    profile: { },
 
     create: {
       name: Math.random().toString(36).substring(7),

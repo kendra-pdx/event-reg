@@ -1,13 +1,13 @@
-package me.enkode.er.backend.server
+package me.enkode.er.backend.framework
 
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.model.headers.{`Access-Control-Allow-Credentials`, `Access-Control-Allow-Headers`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Origin`}
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 
 trait CORSSupport {
-  private val corsResponseHeaders = List(
+  val corsResponseHeaders = List(
     `Access-Control-Allow-Origin`.*,
     `Access-Control-Allow-Credentials`(true),
     `Access-Control-Allow-Headers`("Authorization",
@@ -26,10 +26,4 @@ trait CORSSupport {
   def withCORS(r: Route): Route = addAccessControlHeaders {
     preflightRequestHandler ~ r
   }
-
-  // Helper method to add CORS headers to HttpResponse
-  // preventing duplication of CORS headers across code
-//  def addCORSHeaders(response: HttpResponse): HttpResponse =
-//    response.withHeaders(corsResponseHeaders)
-
 }

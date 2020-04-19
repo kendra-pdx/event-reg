@@ -4,7 +4,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{PathMatcher, Route}
 import cats.data.EitherT
 import cats.implicits._
-import me.enkode.er.backend.auth.AuthService
+import me.enkode.er.backend.auth.AuthInfo.{Scope, Subject}
+import me.enkode.er.backend.auth.{AuthDirectives, AuthService}
 import me.enkode.er.backend.framework.log._
 import me.enkode.er.backend.framework.{Endpoint, ErrorResponse, μPickleMarshallingSupport}
 
@@ -12,11 +13,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ProfileEndpoint(
   profileService: ProfileService[Future],
-  authService: AuthService[Future]
-)(implicit ec: ExecutionContext) extends Endpoint with μPickleMarshallingSupport {
+  val authService: AuthService[Future]
+)(implicit ec: ExecutionContext) extends Endpoint with AuthDirectives with μPickleMarshallingSupport {
   val logger = new ConsoleLogger(getClass.getSimpleName, ConsoleLogger.Level.Debug)
   override val name: String = "profile"
 
+  import AuthDirectives._
   import upickle.default._
 
   // --== GET PROFILE ==--
@@ -75,16 +77,18 @@ class ProfileEndpoint(
     val getProfile = path(basePathMatcher / "profile" / MatchProfileId) { profileId =>
       requestTrace("getProfile") { implicit traceSpan: TraceSpan =>
         get {
-          logger.debug(Map("profileId" -> profileId.asString))
-          complete {
-            (for {
-              profile <- EitherT(profileService.findProfileById(profileId))
-            } yield {
-              ProfileResponse(profile)
-            }).valueOr({
-              case ProfileService.ProfileNotFound(id) => throw ErrorResponse.ClientError(s"$id not found")
-              case ProfileService.FindProfileRepFailure(t) => throw ErrorResponse.ClientError(t.getMessage)
-            })
+          requireAuth(hasAllScopes(Scope("*")), subjectIs(Subject(profileId.asString)))(traceSpan) { _ =>
+            logger.debug(Map("profileId" -> profileId.asString))
+            complete {
+              (for {
+                profile <- EitherT(profileService.findProfileById(profileId))
+              } yield {
+                ProfileResponse(profile)
+              }).valueOr({
+                case ProfileService.ProfileNotFound(id) => throw ErrorResponse.ClientError(s"$id not found")
+                case ProfileService.FindProfileRepFailure(t) => throw ErrorResponse.ClientError(t.getMessage)
+              })
+            }
           }
         }
       }
