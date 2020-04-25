@@ -11,9 +11,9 @@ run:
 run-dev:
 	-@docker create \
 	-p 8081:80 \
-	-v $(cd dist && pwd):/usr/share/nginx/html \
+	-v $(shell cd dist && pwd):/usr/share/nginx/html \
 	--name ui \
-	kendra/event-ui
+	nginx:alpine
 
 	@docker start -ai ui
 

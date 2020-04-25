@@ -16,7 +16,7 @@ run-dev:
 	-p 8080:8080 \
 	--name app \
 	--link database \
-	-v `pwd`/backend-server/target/scala-2.13/:/app \
+	-v $(shell cd ./backend-server/target/scala-2.13 && pwd)/:/app \
 	kendra/event-server
 
 	@docker start \
@@ -28,7 +28,7 @@ run-db:
 	-e POSTGRES_PASSWORD=event-reg \
 	-p 5432:5432 \
 	-h postgres \
-	-v $(cd pg_data && pwd):s/var/lib/postgresql/data \
+	-v $(shell cd pg_data && pwd):/var/lib/postgresql/data \
 	--name database \
 	postgres:12
 
