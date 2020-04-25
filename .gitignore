@@ -3,4 +3,4 @@
 .DS_Store
 */node_modules/**
 **/dist/*.js
-!/backend/pg_data/
+*/pg_data/**

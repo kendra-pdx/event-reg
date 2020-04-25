@@ -9,13 +9,15 @@
     </div>
 
     <hr/>
-
+<!-- 
     <div>
       <div>Name: <input type="text" v-model="create.name"/></div>
       <div>Email: <input type="text" v-model="create.email"/></div>
       <div>Password: <input type="password" v-model="create.password"/></div>
       <button v-on:click="doCreateUser">create</button>
-    </div>
+    </div> -->
+
+    <create-profile v-on:created="updateCreatedProfile"></create-profile>
 
     <hr/>
 

@@ -2,18 +2,18 @@ import _ from "lodash";
 import Vue from "vue";
 import * as services from "./services.js"
 
+import CreateProfile from "./CreateProfile.vue"
+
 var app = new Vue({
   el: "#app",
+  components: {
+    "create-profile": CreateProfile
+  },
+  
   data: {
     loaded: false,
 
     profile: { },
-
-    create: {
-      name: Math.random().toString(36).substring(7),
-      email: Math.random().toString(36).substring(7),
-      password: "password"
-    },
 
     login: {
       email: "",
@@ -22,16 +22,12 @@ var app = new Vue({
   },
 
   methods: {
-    doCreateUser: function () {
-      services.createUser(app.create.email, app.create.name, app.create.password)
-        .then(user => {
-          app.login.email = user.email;
-        }).catch((error) => {
-          console.log(error);
-        })
+    updateCreatedProfile: (profile) => {
+      console.log("new profile", profile)
+      app.login.email = profile.email;
     },
 
-    doLogin: function () {
+    doLogin: () => {
       console.log("login submit!");
       services.login(app.login.email, app.login.password)
         .then((json) => {
