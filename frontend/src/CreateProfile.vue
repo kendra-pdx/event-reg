@@ -1,8 +1,8 @@
 <template>
     <div>
-      <div>Name: <input type="text" v-model="name"/></div>
-      <div>Email: <input type="text" v-model="email"/></div>
-      <div>Password: <input type="password" v-model="password"/></div>
+      <div>Name: <input type="text" placeholder="name" v-model="name"/></div>
+      <div>Email: <input type="text" placeholder="email" v-model="email"/></div>
+      <div>Password: <input type="password" placeholder="password" v-model="password"/></div>
       <button v-on:click="doCreateUser">create</button>
     </div>
 </template>

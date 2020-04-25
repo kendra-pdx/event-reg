@@ -3,6 +3,8 @@ package me.enkode.er.backend.profile
 import java.time.Instant
 import java.util.UUID
 
+import me.enkode.er.backend.profile.ProfileRepository.DuplicateUserError
+import org.postgresql.util.PSQLException
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -60,6 +62,7 @@ class PgProfileRepository(db: Database)(implicit ec: ExecutionContext) extends P
   /**
    * creates a user if they don't already exist
    * throws DuplicateUserError if the user exists
+   * throws CreateUserFailed otherwise
    */
   override def insert(user: User): Future[User] = {
     val q = Tables.profiles += ((
@@ -69,11 +72,14 @@ class PgProfileRepository(db: Database)(implicit ec: ExecutionContext) extends P
       user.password.hash,
       user.password.lastChanged
     ))
-    for{
+    (for{
       _ <- db.run(q)
     } yield {
       user
-    }
+    }).recover({
+      case pgex: PSQLException if pgex.getServerErrorMessage.getDetail contains "already exists" =>
+        throw DuplicateUserError(user)
+    })
   }
 
   def init(): Future[Unit] = {

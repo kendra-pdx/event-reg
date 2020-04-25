@@ -68,7 +68,9 @@ class ProfileEndpoint(
               created <- EitherT(profileService.createUser(createUser.email, createUser.fullName, createUser.password))
             } yield {
               CreateUserResponse(created.profile.email, created.profile.email, created.profile.fullName)
-            }).valueOr(err => throw new RuntimeException(err.toString))
+            }).valueOr({
+              case ProfileService.DuplicateUser(_) => throw ErrorResponse.ClientError(s"user already exists")
+            })
           }
         }
       }

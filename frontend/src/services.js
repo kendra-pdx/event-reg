@@ -3,6 +3,14 @@ function url(path) {
     return "http://localhost:8080/events/" + path;
 }
 
+async function handleResponse(response) {
+    if (response.status == 200) {
+        return response.json()
+    } else {
+        return response.text().then(Promise.reject)
+    }
+}
+
 function authClaims() {
     const authToken = localStorage.getItem("authToken")
     if (authToken) {
@@ -34,7 +42,7 @@ export async function login(email, password) {
             email: email,
             password: password
         })
-    }).then(r => r.json()).then(json => {
+    }).then(handleResponse).then(json => {
         localStorage.setItem("authToken", json.authToken)
         localStorage.setItem("refreshToken", json.refreshToken)
         console.log(authClaims())
@@ -52,7 +60,7 @@ export async function getProfile(id) {
                 }
             })
         })
-        .then(r => r.json())
+        .then(handleResponse)
 
 }
 
@@ -68,5 +76,5 @@ export async function createUser(email, fullName, password) {
             fullName: fullName,
             password: password
         })
-    }).then(r => r.json());
+    }).then(handleResponse);
 }

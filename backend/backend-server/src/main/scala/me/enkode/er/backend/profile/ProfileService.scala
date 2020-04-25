@@ -8,8 +8,10 @@ import cats._
 import cats.data.EitherT
 import cats.implicits._
 import me.enkode.er.backend.auth.{AuthInfo, AuthService}
+import me.enkode.er.backend.framework.log.{ConsoleLogger, TraceSpan}
 
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 object ProfileService {
   sealed trait LoginFailure
@@ -34,6 +36,7 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
   authService: AuthService[F],
 ) {
   import ProfileService._
+  val logger = new ConsoleLogger(classOf[ProfileService[F]].getSimpleName, ConsoleLogger.Level.Debug)
 
   def login(email: String, password: String): F[Either[LoginFailure, Login]] = {
     val maybeUser: F[Either[LoginFailure, User]] = for {
@@ -63,7 +66,7 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
     }).value
   }
 
-  def createUser(email: String, fullName: String, clearPassword: String): F[Either[CreateUserFailure, User]] = {
+  def createUser[Ctx: TraceSpan.Container](email: String, fullName: String, clearPassword: String)(implicit C: Ctx): F[Either[CreateUserFailure, User]] = {
     //todo: validate inputs
     val password = Password(hash(clearPassword, email), Instant.now)
     val user = User(
@@ -74,8 +77,12 @@ class ProfileService[F[_]: MonadError[*[_], Throwable]](
     } yield {
       user.asRight[CreateUserFailure]
     }).recover({
-      case ProfileRepository.DuplicateUserError(_) => DuplicateUser(user).asLeft[User]
-      case _: Throwable => ???
+      case ProfileRepository.DuplicateUserError(_) =>
+        DuplicateUser(user).asLeft[User]
+
+      case NonFatal(t) =>
+        logger.error(s"create user failed: $t")
+        throw t
     })
   }
 
