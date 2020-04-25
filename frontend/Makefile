@@ -9,8 +9,11 @@ run:
 	kendra/event-ui
 
 run-dev:
-	@docker run \
+	-@docker create \
 	-p 8081:80 \
-	-v `pwd`/dist:/usr/share/nginx/html \
+	-v $(cd dist && pwd):/usr/share/nginx/html \
+	--name ui \
 	kendra/event-ui
+
+	@docker start -ai ui
 

@@ -10,8 +10,6 @@ object ErrorResponse extends Directives with μPickleMarshallingSupport with COR
   case class ClientError(message: String) extends RuntimeException
   case class ServerError(message: String) extends RuntimeException
 
-
-
   implicit val akkaErrorHandler: ExceptionHandler = {
     ExceptionHandler {
       case ClientError(message) =>
