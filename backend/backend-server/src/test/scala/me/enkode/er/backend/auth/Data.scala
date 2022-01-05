@@ -25,13 +25,14 @@ trait Data {
 
   val validAuthInfo: AuthInfo = {
     import AuthInfo._
+    val t = now()
     AuthInfo(
       IssuerEncoding("todo", keyIdA),
       Subject("todo"),
-      Audience("todo"),
-      Expires(now.plus(30, ChronoUnit.DAYS)),
-      NotBefore(now.minus(30, ChronoUnit.DAYS)),
-      IssuedAt(now),
+      Audience("*"),
+      Expires(t.plus(30, ChronoUnit.DAYS)),
+      NotBefore(t.minus(30, ChronoUnit.DAYS)),
+      IssuedAt(t),
       JwtId(UUID.randomUUID().toString),
       List(Scope("read")),
     )

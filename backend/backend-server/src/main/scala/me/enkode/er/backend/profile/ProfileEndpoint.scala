@@ -63,7 +63,7 @@ class ProfileEndpoint(
       requestTrace("createProfile") { implicit traceSpan: TraceSpan =>
         (post & entity(as[CreateUserRequest])) { createUser =>
           complete {
-            logger.info(s"creating profile: email=${createUser}")
+            logger.info(s"creating profile: email=$createUser")
             (for {
               created <- EitherT(profileService.createUser(createUser.email, createUser.fullName, createUser.password))
             } yield {

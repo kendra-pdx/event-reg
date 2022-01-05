@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object PgProfileRepository {
   object Tables {
-    class Profile(tag: Tag) extends Table[(UUID, String, String, Array[Byte], Instant)](tag, "profile") {
+    class Profile(tag: Tag) extends Table[(UUID, String, String, Array[Byte], Instant)](tag, "profiles") {
       def id = column[UUID]("id", O.PrimaryKey)
       def email = column[String]("email", O.Unique)
       def fullName = column[String]("full_name")

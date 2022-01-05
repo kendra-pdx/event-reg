@@ -4,7 +4,7 @@ object Boilerplate extends AutoPlugin {
   override def trigger = allRequirements
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.13.7",
     organization := "enkode.me",
     scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlint"),
 //    scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xlint", "-Xfatal-warnings"),
@@ -15,26 +15,26 @@ object Boilerplate extends AutoPlugin {
 
   object Modules {
     object Versions {
-      val kindProjector = "0.11.0"
+      val kindProjector = "0.13.2"
 
-      val akkaHttp = "10.1.11"
-      val akka = "2.6.4"
+      val akkaHttp = "10.2.6"
+      val akka = "2.6.18"
 
-      val μPickle = "0.9.5"
-      val μJson = "0.9.5"
+      val μPickle = "1.4.3"
+      val μJson = "1.4.3"
 
-      val enumeratum = "1.5.15"
+      val enumeratum = "1.7.0"
 
-      val catsCore = "2.2.0-M1"
-      val catsMtlCore = "0.7.0"
-      val catsEffect = "2.1.2"
+      val catsCore = "2.7.0"
+      val catsMtlCore = "0.7.1"
+      val catsEffect = "3.3.0"
 
-      val scalaTest = "3.1.1"
+      val scalaTest = "3.2.9"
 
-      val pgSqlJdbc = "42.2.12"
-      val slick = "3.3.2"
+      val pgSqlJdbc = "42.3.1"
+      val slick = "3.3.3"
 
-      val monocle = "2.0.3"
+      val monocle = "2.1.0"
     }
 
     lazy val kindProjector = "org.typelevel" %% "kind-projector" % Versions.kindProjector cross CrossVersion.full

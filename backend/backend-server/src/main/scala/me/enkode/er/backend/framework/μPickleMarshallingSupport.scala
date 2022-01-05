@@ -16,7 +16,7 @@ trait μPickleMarshallingSupport {
     μPickleUnmarshaller(reader)
 
   implicit def μPickleUnmarshaller[T](implicit reader: Reader[T]): FromEntityUnmarshaller[T] =
-    μPickleValueUnmarshaller.map(read[T])
+    μPickleValueUnmarshaller.map(value => read[T](value))
 
   implicit def μPickleValueUnmarshaller: FromEntityUnmarshaller[Value.Value] =
     Unmarshaller.byteStringUnmarshaller.forContentTypes(`application/json`).mapWithCharset { (data, charset) =>

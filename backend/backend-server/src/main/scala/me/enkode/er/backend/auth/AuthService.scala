@@ -15,6 +15,14 @@ import scala.concurrent.duration._
 import scala.util.{Random, Try}
 
 object AuthService {
+  implicit class InstantOps(val instant: Instant) extends AnyVal {
+    def isBetween(earlier: Instant, later: Instant): Boolean = {
+      instant.isAfter(earlier) && instant.isBefore(later)
+    }
+
+    def toEpochSeconds: Long = instant.toEpochMilli / 1000
+  }
+
   private case object KeyExtractionException extends RuntimeException("token did not contain a key id")
 
   sealed trait ValidationError
@@ -26,6 +34,8 @@ object AuthService {
   case class MissingField(name: String) extends ValidationError
   case class InvalidField(name: String) extends ValidationError
   case object InvalidSignature extends ValidationError
+  case object TokenOutOfDate extends ValidationError
+  case object InvalidAudience extends ValidationError
 
   type ValidationResult[T] = ValidatedNel[ValidationError, T]
 
@@ -52,9 +62,20 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
   }
 
   private def validateAuthInfo(authInfo: AuthInfo): F[ValidationResult[AuthInfo]] = {
-    //todo: validate exp / nbf
-    //todo: validate aud
-    authInfo.validNel[ValidationError].pure[F]
+    val now = Instant.now()
+    def validDates: ValidationResult[AuthInfo] = Either.cond(
+      now.isBetween(authInfo.notBefore.asInstant, authInfo.expires.asInstant),
+      authInfo,
+      TokenOutOfDate
+    ).toValidatedNel
+
+    def audienceIsAllowed: ValidationResult[AuthInfo] = Either.cond(
+      audience == authInfo.audience,
+      authInfo,
+      InvalidAudience
+    ).toValidatedNel
+
+    (validDates *> audienceIsAllowed).pure[F]
   }
 
   private def validateTokenSignature(authToken: AuthToken, key: Key): ValidationResult[AuthToken]= {
@@ -157,8 +178,6 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
     } yield {
       //todo: this duplicates failures from the key check in combination with *> below
       vKey.fold(_.invalid[AuthToken], k => validateTokenSignature(authToken, k))
-
-
     }
 
     for {
@@ -193,9 +212,9 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
         "iss" -> Str(authInfo.issuer.asString),
         "sub" -> Str(authInfo.subject.asString),
         "aud" -> Str(authInfo.audience.asString),
-        "exp" -> Num(authInfo.expires.asInstant.toEpochMilli / 1000),
-        "nbf" -> Num(authInfo.notBefore.asInstant.toEpochMilli / 1000),
-        "iat" -> Num(authInfo.issuedAt.asInstant.toEpochMilli / 1000),
+        "exp" -> Num(authInfo.expires.asInstant.toEpochSeconds.toDouble),
+        "nbf" -> Num(authInfo.notBefore.asInstant.toEpochSeconds.toDouble),
+        "iat" -> Num(authInfo.issuedAt.asInstant.toEpochSeconds.toDouble),
         "jti" -> Str(authInfo.jwtId.asString),
         "scp" -> authInfo.scopes.map(s => Str(s.asString))
       )))
@@ -256,7 +275,7 @@ class AuthService[F[_]: MonadError[*[_], Throwable]](
     val key = new Key {
       override val keyId: KeyId = KeyId(UUID.randomUUID().toString)
       override val keyType: KeyType = KeyType("shared")
-      override val data: Array[Byte] = Random.alphanumeric.take(64).mkString.getBytes
+      override val data: Array[Byte] = Random.alphanumeric.take(64).map(_.toByte).toArray
       override val expires: Instant = now.plus(Duration.ofNanos(duration.toNanos))
       override val notBefore: Instant = now.minus(Duration.ofMinutes(1))
     }

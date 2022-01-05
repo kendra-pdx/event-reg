@@ -11,7 +11,6 @@ import org.scalatest.matchers.must.Matchers
 
 class ProfileServiceTest extends AnyFeatureSpec with Matchers with EitherValues with Data {
   type TestState[A] = StateT[Either[Throwable, *], InMemoryState, A]
-  type FrameworkTestState[A] = StateT[Either[Throwable, *], InMemoryState, A]
 
   val keyRepository = new InMemoryKeyRepository[TestState[*]]
   val authService = new AuthService[TestState[*]](keyRepository)

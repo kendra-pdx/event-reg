@@ -8,7 +8,7 @@ import cats.implicits._
 import me.enkode.er.backend.auth.{AuthService, PgKeyRepository}
 import me.enkode.er.backend.framework.CORSSupport
 import me.enkode.er.backend.framework.log._
-import me.enkode.er.backend.profile.{PgProfileRepository, ProfileEndpoint, ProfileService}
+import me.enkode.er.backend.profile.{PgProfileRepository, PgRolesRepository, ProfileEndpoint, ProfileService}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent._
@@ -19,7 +19,7 @@ object ServerMain extends App with CORSSupport {
   import ServerRejectionHandler._
 
   val logger = new ConsoleLogger(this.getClass.getSimpleName, ConsoleLogger.Level.Debug)
-  implicit val traceSpan = TraceSpan("serverMain")
+  implicit val traceSpan: TraceSpan = TraceSpan("serverMain")
 
   implicit val actorSystem: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
@@ -30,9 +30,10 @@ object ServerMain extends App with CORSSupport {
   val dbEc = ExecutionContext.fromExecutor(null)
 
   val keyRepository = new PgKeyRepository(db)(dbEc)
-  val authService = new AuthService(keyRepository)
-
   val profileRepository = new PgProfileRepository(db)(dbEc)
+  val rolesRepository = new PgRolesRepository(db)(dbEc)
+
+  val authService = new AuthService(keyRepository)
   val profileService = new ProfileService(profileRepository, authService)
 
   val profileEndpoint = new ProfileEndpoint(profileService, authService)
@@ -40,6 +41,7 @@ object ServerMain extends App with CORSSupport {
   val init = (for {
     _ <- keyRepository.init()
     _ <- profileRepository.init()
+    _ <- rolesRepository.init()
     _ <- authService.generateKey()
   } yield {
     logger.info("DB Init Successful")
@@ -57,7 +59,8 @@ object ServerMain extends App with CORSSupport {
 
   val port = 8080
   private val http = Http()
-  val bindingFuture = http.bindAndHandle(withCORS(route), "0.0.0.0", port)
+
+  val bindingFuture = http.newServerAt("0.0.0.0", port).bind(withCORS(Route.seal(route)))
 
   logger.info(s"listening on $port")
 

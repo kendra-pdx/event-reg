@@ -1,7 +1,7 @@
 import Boilerplate.Modules
 
 lazy val commonSettings = Seq(
-  logLevel in assembly := Level.Info
+  assembly / logLevel := Level.Info
 )
 
 lazy val `backend-test-utils` = project.in(file("backend/backend-test-utils"))
@@ -34,7 +34,7 @@ lazy val `backend-server` = project.in(file("backend/backend-server"))
       Modules.μJson,
       Modules.μPickle,
     ),
-    assemblyJarName in assembly := "events-api.jar"
+    assembly / assemblyJarName := "events-api.jar"
   )
 
 lazy val `event-reg` = project.in(file("."))

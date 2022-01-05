@@ -1,5 +1,6 @@
 package me.enkode.er.backend.auth
 
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Base64
 
@@ -16,6 +17,25 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
 
   val keyRepository = new InMemoryKeyRepository[TestState[*]]
   val authService = new AuthService[TestState[*]](keyRepository)
+
+  Feature("utilities for time") {
+    val earlier = Instant.parse("2020-01-01T00:00:00Z")
+    val later = Instant.parse("2020-03-01T00:00:00Z")
+    val mid = Instant.parse("2020-02-01T00:00:00Z")
+    import AuthService._
+
+    Scenario("inBetween: a < b < c") {
+      mid.isBetween(earlier, later) mustBe true
+    }
+
+    Scenario("inBetween: a > b < c") {
+      earlier.isBetween(mid, later) mustBe false
+    }
+
+    Scenario("inBetween: a < b > c") {
+      later.isBetween(earlier, mid) mustBe false
+    }
+  }
 
   Feature("encoding auth info into a token") {
     Scenario("should be able to create a token from info") {
@@ -227,15 +247,54 @@ class AuthServiceTest extends AnyFeatureSpec with Matchers with Data {
     }
 
     Scenario("validating a token that is expired should fail") {
-      pending
+      val expiredInfo = validAuthInfo.copy(expires = AuthInfo.Expires(Instant.now().minus(1, ChronoUnit.DAYS)))
+
+      val initialState = InMemoryState(
+        keys = Map(keyIdA -> keyA)
+      )
+
+      val authInfo = (for {
+        expiredToken <- authService.authInfoToToken(expiredInfo)
+        result <- authService.validateAuthToken(expiredToken)
+      } yield {
+        result
+      }).runA(initialState).valueOr(throw _)
+
+      authInfo must contain value AuthService.TokenOutOfDate
     }
 
     Scenario("validating a token that is early should fail") {
-      pending
+      val expiredInfo = validAuthInfo.copy(notBefore = AuthInfo.NotBefore(Instant.now().plus(1, ChronoUnit.DAYS)))
+
+      val initialState = InMemoryState(
+        keys = Map(keyIdA -> keyA)
+      )
+
+      val authInfo = (for {
+        expiredToken <- authService.authInfoToToken(expiredInfo)
+        result <- authService.validateAuthToken(expiredToken)
+      } yield {
+        result
+      }).runA(initialState).valueOr(throw _)
+
+      authInfo must contain value AuthService.TokenOutOfDate
     }
 
     Scenario("validating a token for an invalid audience should fail") {
-      pending
+      val expiredInfo = validAuthInfo.copy(audience = AuthInfo.Audience("invalid"))
+
+      val initialState = InMemoryState(
+        keys = Map(keyIdA -> keyA)
+      )
+
+      val authInfo = (for {
+        expiredToken <- authService.authInfoToToken(expiredInfo)
+        result <- authService.validateAuthToken(expiredToken)
+      } yield {
+        result
+      }).runA(initialState).valueOr(throw _)
+
+      authInfo must contain value AuthService.InvalidAudience
     }
   }
 
